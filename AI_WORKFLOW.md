@@ -1,0 +1,3 @@
+# AI workflow
+
+I used **Cursor** (Claude) as the primary assistant for scaffolding the Turborepo, Prisma schema, service layer, API routes, and initial UI components. I wrote and reviewed the business rules myself—stage order, stock increment on `PACKING → COMPLETED`, idempotency keys, and role-based auth—and adjusted the data model and trade-offs in `DECISIONS.md` after each AI pass. I manually debugged local networking (Expo, LAN, tunnel), Playwright demo recording, and deployment config; AI helped draft scripts and copy but I verified every change against the assignment brief before committing.

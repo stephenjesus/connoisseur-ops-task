@@ -6,15 +6,17 @@ Garment production tracker for **Connoisseur Fashions** — operator mobile app 
 
 | Surface | URL |
 |---------|-----|
-| Web (manager) | _Deploy to Vercel — see below_ |
-| Mobile (operator) | Expo Go — `pnpm mobile` **or** open `/operator` on your phone browser |
+| Web (manager) | **Deploy to Vercel** — see [Deploy](#deploy-to-vercel); then `https://YOUR-APP.vercel.app` |
+| Mobile (operator) | `https://YOUR-APP.vercel.app/operator` (phone browser) **or** Expo Go + `pnpm mobile` |
 
-### Quick mobile fallback (if Expo Go fails)
+> After deploy, update the URLs above and in `SUBMISSION.md`.
 
-Open on your phone browser (same Wi‑Fi):
+### Quick mobile fallback (local dev)
+
+Open on your phone browser (same Wi‑Fi as Mac):
 
 ```
-http://YOUR_MAC_IP:3001/operator
+http://YOUR_MAC_IP:3000/operator
 ```
 
 Login: `operator@demo.com` / `password123` — enter bundle ID manually (e.g. `BND-0001`).
@@ -30,7 +32,7 @@ Login: `operator@demo.com` / `password123` — enter bundle ID manually (e.g. `B
 
 - **Monorepo:** Turborepo + pnpm
 - **Web:** Next.js 16, Tailwind, TanStack Query
-- **Mobile:** Expo SDK **54** (matches Expo Go 54.x), Expo 56, expo-camera
+- **Mobile:** Expo SDK **54** (Expo Go 54.x), expo-camera
 - **API + DB:** Next.js API routes, Prisma, PostgreSQL
 - **Shared:** Zod schemas, typed API client
 
@@ -99,11 +101,14 @@ packages/api-client/ Typed fetch client
 
 ## AI workflow
 
-I used **Cursor** with Claude for scaffolding the monorepo, Prisma schema, and service layer. AI generated the initial API routes, dashboard UI, and Expo screens; I reviewed business rules (stage order, stock on complete, idempotency) and adjusted the data model. Deployment steps and `DECISIONS.md` offline-sync design were written with AI assistance and manually verified against the assignment brief.
+See **[AI_WORKFLOW.md](./AI_WORKFLOW.md)** (required submission note).
 
 ## Assignment artifacts
 
-- `DECISIONS.md` — architecture, trade-offs, offline sync approach
-- Seed data — demo users, styles, bundles, stock pre-loaded
-- Screen recording — walk through operator scan → dashboard update (record locally)
-# connoisseur-ops-task
+| Artifact | Location |
+|----------|----------|
+| Architecture & trade-offs | `DECISIONS.md` |
+| Submission checklist | `SUBMISSION.md` |
+| AI workflow (3–4 sentences) | `AI_WORKFLOW.md` |
+| Demo video (app flow) | `demo/connoisseur-ops-demo.mp4` — regenerate with `pnpm record-demo` |
+| Screen recording (3–5 min) | Record manually using script in `SUBMISSION.md` §5 |
