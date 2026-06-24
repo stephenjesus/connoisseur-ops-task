@@ -12,6 +12,8 @@
     "db:studio": "pnpm --filter @connoisseur/db studio",
     "postinstall": "pnpm db:generate",
     "web": "pnpm --filter @connoisseur/web dev",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
     "tunnel": "node scripts/tunnel.mjs 3000",
     "mobile": "pnpm --filter @connoisseur/mobile start",
     "phone": "node scripts/start-mobile.mjs",
