@@ -9,11 +9,16 @@ export async function POST(request: Request) {
     const user = await authenticateUser(body.email, body.password);
     const token = await signToken(user);
 
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const isHttps =
+      forwardedProto === "https" ||
+      new URL(request.url).protocol === "https:";
+
     const response = ok({ token, user });
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" || isHttps,
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });

@@ -30,14 +30,14 @@ export function LoginForm() {
       });
       const json = await res.json();
       if (!json.success) {
-        toast.error(json.error.message);
+        toast.error(json.error?.message ?? "Invalid credentials");
         return;
       }
       toast.success("Signed in");
       router.push("/dashboard");
       router.refresh();
     } catch {
-      toast.error("Unable to sign in");
+      toast.error("Cannot reach server. Check your connection and try again.");
     }
   }
 

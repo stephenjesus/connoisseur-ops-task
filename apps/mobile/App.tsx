@@ -12,12 +12,12 @@ import {
   View,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
-import type { BundleDto } from "@connoisseur/shared";
-import { STAGE_LABELS } from "@connoisseur/shared";
-import { api, clearToken, getToken, setToken } from "./src/lib/api";
+import type { BundleDto } from "./src/lib/shared";
+import { STAGE_LABELS, api } from "./src/lib/shared";
+import { clearToken, getToken, setToken } from "./src/lib/auth";
 import { getNextAction, StageStepper } from "./src/components/stage-stepper";
+import { LazyScanScreen } from "./src/components/lazy-scan-screen";
 
 type Screen = "login" | "home" | "scan" | "manual" | "bundle";
 
@@ -28,39 +28,47 @@ export default function App() {
   const [password, setPassword] = useState("password123");
   const [manualId, setManualId] = useState("");
   const [bundle, setBundle] = useState<BundleDto | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
-  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
-    getToken().then((token) => {
-      setScreen(token ? "home" : "login");
-      setLoading(false);
-    });
+    getToken()
+      .then((stored) => {
+        setTokenState(stored);
+        setScreen(stored ? "home" : "login");
+      })
+      .catch(() => setScreen("login"))
+      .finally(() => setLoading(false));
   }, []);
 
-  const openBundle = useCallback(async (id: string) => {
-    setError(null);
-    setSubmitting(true);
-    try {
-      const data = await api.getBundle(id.trim().toUpperCase());
-      setBundle(data);
-      setRecent((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, 3));
-      setScreen("bundle");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Bundle not found");
-    } finally {
-      setSubmitting(false);
-    }
-  }, []);
+  const openBundle = useCallback(
+    async (id: string) => {
+      if (!token) return;
+      setError(null);
+      setSubmitting(true);
+      try {
+        const data = await api.getBundle(id.trim().toUpperCase(), token);
+        setBundle(data);
+        setRecent((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, 3));
+        setScreen("bundle");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Bundle not found");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [token],
+  );
 
   async function handleLogin() {
     setError(null);
     setSubmitting(true);
     try {
-      const { token } = await api.login({ email, password });
-      await setToken(token);
+      const { token: newToken } = await api.login(email, password);
+      await setToken(newToken);
+      setTokenState(newToken);
       setScreen("home");
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
@@ -71,7 +79,7 @@ export default function App() {
   }
 
   async function handleTransition() {
-    if (!bundle) return;
+    if (!bundle || !token) return;
     const next = getNextAction(bundle);
     if (!next) {
       setError("Bundle is already completed");
@@ -84,6 +92,7 @@ export default function App() {
       const updated = await api.transitionBundle(
         bundle.id,
         { toStage: next, fromStage: bundle.currentStage },
+        token,
         `${bundle.id}-${next}-${Date.now()}`,
       );
       setBundle(updated);
@@ -98,6 +107,7 @@ export default function App() {
 
   async function handleLogout() {
     await clearToken();
+    setTokenState(null);
     setBundle(null);
     setScreen("login");
   }
@@ -139,7 +149,11 @@ export default function App() {
             placeholder="Password"
           />
           {error && <Text style={styles.error}>{error}</Text>}
-          <Pressable style={styles.primaryBtn} onPress={handleLogin} disabled={submitting}>
+          <Pressable
+            style={styles.primaryBtn}
+            onPress={handleLogin}
+            disabled={submitting}
+          >
             {submitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
@@ -152,36 +166,14 @@ export default function App() {
   }
 
   if (screen === "scan") {
-    if (!permission?.granted) {
-      return (
-        <SafeAreaView style={styles.safe}>
-          <View style={styles.centered}>
-            <Text style={styles.subtitle}>Camera permission required</Text>
-            <Pressable style={styles.primaryBtn} onPress={requestPermission}>
-              <Text style={styles.primaryBtnText}>Allow camera</Text>
-            </Pressable>
-            <Pressable style={styles.secondaryBtn} onPress={() => setScreen("home")}>
-              <Text style={styles.secondaryBtnText}>Back</Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      );
-    }
-
     return (
       <SafeAreaView style={styles.safeDark}>
         <StatusBar style="light" />
-        <CameraView
-          style={styles.camera}
-          barcodeScannerSettings={{ barcodeTypes: ["qr", "code128", "code39"] }}
-          onBarcodeScanned={submitting ? undefined : ({ data }) => openBundle(data)}
+        <LazyScanScreen
+          submitting={submitting}
+          onScan={openBundle}
+          onBack={() => setScreen("home")}
         />
-        <View style={styles.scanOverlay}>
-          <Pressable style={styles.backChip} onPress={() => setScreen("home")}>
-            <Text style={styles.backChipText}>← Back</Text>
-          </Pressable>
-          <Text style={styles.scanHint}>Align bundle barcode in frame</Text>
-        </View>
       </SafeAreaView>
     );
   }
@@ -283,7 +275,11 @@ export default function App() {
           <View style={styles.recentSection}>
             <Text style={styles.sectionTitle}>Recent scans</Text>
             {recent.map((id) => (
-              <Pressable key={id} style={styles.recentCard} onPress={() => openBundle(id)}>
+              <Pressable
+                key={id}
+                style={styles.recentCard}
+                onPress={() => openBundle(id)}
+              >
                 <Text style={styles.recentId}>{id}</Text>
                 <Text style={styles.recentAction}>Open →</Text>
               </Pressable>
@@ -370,19 +366,12 @@ const styles = StyleSheet.create({
   },
   recentId: { fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", fontWeight: "700" },
   recentAction: { color: "#4f46e5", fontWeight: "600" },
-  camera: { flex: 1 },
-  scanOverlay: { position: "absolute", top: 60, left: 20, right: 20 },
-  backChip: {
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  backChipText: { color: "#fff", fontWeight: "600" },
-  scanHint: { color: "#fff", marginTop: 20, textAlign: "center", fontSize: 16 },
   backLink: { color: "#4f46e5", fontWeight: "600", marginBottom: 8 },
-  bundleId: { fontSize: 32, fontWeight: "800", fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" },
+  bundleId: {
+    fontSize: 32,
+    fontWeight: "800",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  },
   bundleStyle: { fontSize: 20, fontWeight: "600", color: "#0f172a" },
   bundleMeta: { color: "#64748b", marginBottom: 8 },
   card: {
@@ -392,10 +381,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
-  doneBanner: {
-    backgroundColor: "#dcfce7",
-    borderRadius: 12,
-    padding: 16,
-  },
+  doneBanner: { backgroundColor: "#dcfce7", borderRadius: 12, padding: 16 },
   doneText: { color: "#166534", fontWeight: "700", textAlign: "center" },
 });

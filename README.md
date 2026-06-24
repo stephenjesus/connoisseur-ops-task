@@ -7,7 +7,17 @@ Garment production tracker for **Connoisseur Fashions** — operator mobile app 
 | Surface | URL |
 |---------|-----|
 | Web (manager) | _Deploy to Vercel — see below_ |
-| Mobile (operator) | Expo Go — scan QR from `pnpm mobile` |
+| Mobile (operator) | Expo Go — `pnpm mobile` **or** open `/operator` on your phone browser |
+
+### Quick mobile fallback (if Expo Go fails)
+
+Open on your phone browser (same Wi‑Fi):
+
+```
+http://YOUR_MAC_IP:3001/operator
+```
+
+Login: `operator@demo.com` / `password123` — enter bundle ID manually (e.g. `BND-0001`).
 
 ## Demo credentials
 
@@ -20,7 +30,7 @@ Garment production tracker for **Connoisseur Fashions** — operator mobile app 
 
 - **Monorepo:** Turborepo + pnpm
 - **Web:** Next.js 16, Tailwind, TanStack Query
-- **Mobile:** Expo 56, expo-camera, expo-secure-store
+- **Mobile:** Expo SDK **54** (matches Expo Go 54.x), Expo 56, expo-camera
 - **API + DB:** Next.js API routes, Prisma, PostgreSQL
 - **Shared:** Zod schemas, typed API client
 
@@ -51,7 +61,7 @@ pnpm db:seed
 
 # 4. Run web
 pnpm web
-# → http://localhost:3000
+# → http://localhost:3000 (or 3001 if 3000 is busy)
 
 # 5. Run mobile (separate terminal)
 pnpm mobile
@@ -96,3 +106,4 @@ I used **Cursor** with Claude for scaffolding the monorepo, Prisma schema, and s
 - `DECISIONS.md` — architecture, trade-offs, offline sync approach
 - Seed data — demo users, styles, bundles, stock pre-loaded
 - Screen recording — walk through operator scan → dashboard update (record locally)
+# connoisseur-ops-task

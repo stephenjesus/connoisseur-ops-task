@@ -14,17 +14,23 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Scan bundle barcodes on the production floor."
+        "NSCameraUsageDescription": "Scan bundle barcodes on the production floor.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
       }
     },
     "android": {
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#0f172a",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "plugins": [
       [
@@ -32,7 +38,8 @@
         {
           "cameraPermission": "Allow Connoisseur Ops to scan bundle barcodes."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

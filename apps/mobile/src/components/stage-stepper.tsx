@@ -1,10 +1,10 @@
-import type { BundleDto } from "@connoisseur/shared";
+import type { BundleDto } from "../lib/shared";
 import {
-  getNextStage,
-  STAGE_LABELS,
-  STAGE_COLORS,
   PRODUCTION_STAGES,
-} from "@connoisseur/shared";
+  STAGE_COLORS,
+  STAGE_LABELS,
+  getNextStage,
+} from "../lib/shared";
 import { View, Text, StyleSheet } from "react-native";
 
 const colors: Record<string, { bg: string; text: string }> = {
@@ -23,7 +23,10 @@ export function StageStepper({ bundle }: { bundle: BundleDto }) {
       {stages.map((stage, index) => {
         const isPast = index < currentIndex;
         const isCurrent = index === currentIndex;
-        const colorKey = stage in STAGE_COLORS ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS] : "green";
+        const colorKey =
+          stage in STAGE_COLORS
+            ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
+            : "green";
         const palette = colors[colorKey] ?? colors.green;
 
         return (
@@ -32,10 +35,15 @@ export function StageStepper({ bundle }: { bundle: BundleDto }) {
               style={[
                 styles.dot,
                 isPast && styles.dotPast,
-                isCurrent && { backgroundColor: palette.bg, borderColor: palette.text },
+                isCurrent && {
+                  backgroundColor: palette.bg,
+                  borderColor: palette.text,
+                },
               ]}
             >
-              <Text style={[styles.dotText, isCurrent && { color: palette.text }]}>
+              <Text
+                style={[styles.dotText, isCurrent && { color: palette.text }]}
+              >
                 {index + 1}
               </Text>
             </View>
@@ -71,7 +79,12 @@ const styles = StyleSheet.create({
   },
   dotPast: { backgroundColor: "#e2e8f0", borderColor: "#94a3b8" },
   dotText: { fontSize: 12, fontWeight: "700", color: "#64748b" },
-  labelWrap: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  labelWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   label: { fontSize: 16, color: "#64748b" },
   labelCurrent: { color: "#0f172a", fontWeight: "700" },
   currentBadge: {

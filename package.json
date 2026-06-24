@@ -10,10 +10,17 @@
     "db:push": "pnpm --filter @connoisseur/db push",
     "db:seed": "pnpm --filter @connoisseur/db seed",
     "db:studio": "pnpm --filter @connoisseur/db studio",
+    "postinstall": "pnpm db:generate",
     "web": "pnpm --filter @connoisseur/web dev",
-    "mobile": "pnpm --filter @connoisseur/mobile start"
+    "tunnel": "node scripts/tunnel.mjs 3000",
+    "mobile": "pnpm --filter @connoisseur/mobile start",
+    "phone": "node scripts/start-mobile.mjs",
+    "mobile:tunnel": "node scripts/start-mobile.mjs",
+    "record-demo": "node scripts/record-demo.mjs",
+    "playwright:install": "PLAYWRIGHT_BROWSERS_PATH=node_modules/.playwright-browsers pnpm exec playwright install chromium"
   },
   "devDependencies": {
+    "playwright": "^1.61.1",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
