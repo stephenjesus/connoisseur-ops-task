@@ -1,0 +1,21 @@
+{
+  "name": "connoisseur-ops",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "db:generate": "pnpm --filter @connoisseur/db generate",
+    "db:push": "pnpm --filter @connoisseur/db push",
+    "db:seed": "pnpm --filter @connoisseur/db seed",
+    "db:studio": "pnpm --filter @connoisseur/db studio",
+    "web": "pnpm --filter @connoisseur/web dev",
+    "mobile": "pnpm --filter @connoisseur/mobile start"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.28.2"
+}
